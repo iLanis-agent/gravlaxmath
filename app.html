@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gravlax math - the app</title>
+<style>
+  :root { --ink:#26221d; --bg:#f6f4ef; --card:#fff; --accent:#7a4a1e; --accent2:#9c6128; --soft:#f0e4d4; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); padding:18px; }
+  .wrap { max-width:1180px; margin:0 auto; }
+  .lede { text-align:center; color:#5d5344; margin:6px 0 14px; font-size:15px; max-width:760px; margin-left:auto; margin-right:auto; }
+  .banner { background:#fdecea; border:1px solid #e0a49a; color:#7c2313; border-radius:10px; padding:12px 16px; font-size:14px; line-height:1.5; margin:0 auto 16px; max-width:900px; }
+  .banner b { display:block; margin-bottom:2px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; }
+  .card { background:var(--card); border-radius:14px; padding:22px; box-shadow:0 1px 3px rgba(60,45,25,.08); }
+  h2 { font-size:19px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#6f6355; margin:10px 0 4px; }
+  input, select { width:100%; padding:9px 10px; border:1px solid #d9cfc0; border-radius:8px; font-size:15px; background:#fffdf9; }
+  button { width:100%; margin-top:16px; padding:12px; border:0; border-radius:9px; background:var(--accent); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  button:hover { background:var(--accent2); }
+  .big { font-size:34px; font-weight:700; margin:14px 0 2px; }
+  .cap { font-size:13px; color:#6f6355; }
+  .pill { display:inline-block; margin-top:10px; padding:5px 12px; border-radius:20px; font-size:13px; font-weight:600; }
+  .pill.warm { background:var(--soft); color:var(--accent); }
+  .pill.bad { background:#f9e0dc; color:#a3341f; }
+  .pill.good { background:#e2f0e4; color:#256b32; }
+  table { width:100%; margin-top:12px; border-collapse:collapse; font-size:14px; }
+  td { padding:7px 0; border-bottom:1px solid #eee5d8; }
+  td:last-child { text-align:right; font-weight:600; }
+  .err { color:#a3341f; font-size:14px; margin-top:10px; }
+  .note { font-size:13px; color:#8a7c6b; margin-top:10px; font-style:italic; }
+  .foot { margin-top:20px; font-size:12.5px; color:#7d7264; line-height:1.6; }
+  .foot a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="lede">Every gravlax recipe says "bury it and wait 48 hours" and skips the arithmetic. Salt percentage against fish weight and hours against thickness decide the cure. Run yours before the salmon hits the dish.</p>
+  <div class="banner">
+    <b>Raw fish is the safety line - read this first.</b>
+    A salt cure flavors fish; it does not sterilize it. Use fish that was commercially frozen or previously frozen to parasite-kill guidance (labeled published norms: 7 days at -20C or colder for home freezers), cure and store at fridge temperature, and discard anything that smells off or feels slimy. When in doubt, throw it out. Pregnant, elderly or immunocompromised guests: skip raw-cured fish entirely.
+  </div>
+  <div class="cards">
+    <div class="card">
+      <h2>The cure mix</h2>
+      <label for="c_fish">Salmon fillet (g)</label>
+      <input id="c_fish" type="number" value="1000" min="0" step="50">
+      <label for="c_style">Cure style</label>
+      <select id="c_style">
+        <option value="classic">classic (salt = sugar)</option>
+        <option value="peppered">peppered (less sugar)</option>
+        <option value="light">light (lower salt)</option>
+      </select>
+      <button id="c_go">Mix the cure</button>
+      <div class="big" id="c_mix">-</div>
+      <div class="cap">total cure mix</div>
+      <div class="pill warm" id="c_verdict" style="display:none"></div>
+      <table id="c_rows" style="display:none">
+        <tr><td>salt</td><td id="c_salt">-</td></tr>
+        <tr><td>sugar</td><td id="c_sugar">-</td></tr>
+      </table>
+      <div class="note" id="c_note" style="display:none"></div>
+      <div class="err" id="c_err"></div>
+    </div>
+    <div class="card">
+      <h2>How long under weights</h2>
+      <label for="t_thick">Thickest point (cm)</label>
+      <input id="t_thick" type="number" value="3" min="0" step="0.5">
+      <label for="t_style">Cure style</label>
+      <select id="t_style">
+        <option value="classic">classic</option>
+        <option value="peppered">peppered</option>
+        <option value="light">light</option>
+      </select>
+      <button id="t_go">Time the cure</button>
+      <div class="big" id="t_hours">-</div>
+      <div class="cap">hours in the fridge</div>
+      <div class="pill warm" id="t_verdict" style="display:none"></div>
+      <div class="note" id="t_note" style="display:none"></div>
+      <div class="err" id="t_err"></div>
+    </div>
+    <div class="card">
+      <h2>Batch check</h2>
+      <label for="k_fish">Salmon fillet (g)</label>
+      <input id="k_fish" type="number" value="1000" min="0" step="50">
+      <label for="k_salt">Salt you actually used (g)</label>
+      <input id="k_salt" type="number" value="30" min="0" step="1">
+      <button id="k_go">Check the salt</button>
+      <div class="big" id="k_pct">-</div>
+      <div class="cap">salt by fish weight</div>
+      <div class="pill" id="k_band" style="display:none"></div>
+      <div class="err" id="k_err"></div>
+    </div>
+  </div>
+  <p class="foot">Salt percentages (2.2-3% by fish weight), salt-to-sugar ratios and hours-per-centimeter (8-14) are labeled guidance from published gravlax and equilibrium-curing norms; your fish, fridge and taste move the real numbers. The arithmetic on top of them is exact. <a href="index.html">Why this exists</a></p>
+</div>
+<script src="engine.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const g = id => parseFloat($(id).value);
+function show(id, txt, cls) { const e = $(id); e.textContent = txt; e.style.display = txt ? 'inline-block' : 'none'; if (cls) e.className = 'pill ' + cls; }
+document.getElementById('c_go').onclick = () => {
+  $('c_err').textContent = '';
+  try {
+    const r = Gravlaxmath.cure(g('c_fish'), $('c_style').value);
+    $('c_mix').textContent = r.mixG + ' g';
+    show('c_verdict', r.verdict, 'warm');
+    $('c_salt').textContent = r.saltG + ' g';
+    $('c_sugar').textContent = r.sugarG + ' g';
+    $('c_rows').style.display = 'table';
+    show('c_note', r.note);
+  } catch (e) { $('c_err').textContent = e.message; }
+};
+document.getElementById('t_go').onclick = () => {
+  $('t_err').textContent = '';
+  try {
+    const r = Gravlaxmath.time(g('t_thick'), $('t_style').value);
+    $('t_hours').textContent = r.hoursLo + '-' + r.hoursHi + ' h';
+    show('t_verdict', r.verdict, 'warm');
+    show('t_note', r.note);
+  } catch (e) { $('t_err').textContent = e.message; }
+};
+document.getElementById('k_go').onclick = () => {
+  $('k_err').textContent = '';
+  try {
+    const r = Gravlaxmath.check(g('k_fish'), g('k_salt'));
+    $('k_pct').textContent = r.pct + ' %';
+    const cls = r.pct < 2 ? 'bad' : (r.pct <= 3.5 ? 'good' : 'warm');
+    show('k_band', r.band, cls);
+  } catch (e) { $('k_err').textContent = e.message; }
+};
+</script>
+</body>
+</html>
